@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Richard Loans lending operations dashboard">
+  <title>Richard Loans | Operations</title>
+  <link rel="stylesheet" href="/vercel/styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-mark">RL</span>
+        <span><strong>Richard Loans</strong><small>Operations desk</small></span>
+      </div>
+      <nav aria-label="Primary navigation">
+        <button class="nav-link active" data-page="dashboard">Overview</button>
+        <button class="nav-link" data-page="customers">Customers</button>
+        <button class="nav-link" data-page="loans">Loans</button>
+        <button class="nav-link" data-page="payments">Payments</button>
+        <button class="nav-link" data-page="collections">Collections</button>
+        <button class="nav-link" data-page="ledger">Interest ledger</button>
+        <button class="nav-link" data-page="reports">Reports</button>
+        <button class="nav-link" data-page="settings">Settings</button>
+      </nav>
+      <div class="sidebar-footer"><span class="status-dot"></span><span id="connection-label">Checking connection</span></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-button" id="menu-button" aria-label="Open navigation">Menu</button>
+        <div><p class="eyebrow">LENDING OPERATIONS</p><h1 id="page-title">Portfolio overview</h1></div>
+        <div class="topbar-meta"><span class="date-label" id="today-label"></span><button class="icon-button" id="refresh-button" aria-label="Refresh dashboard">↻</button></div>
+      </header>
+
+      <section class="notice" id="connection-notice" hidden>
+        <strong>Development connection required</strong>
+        <span>Financial data is not available until the Apps Script HTTP endpoint is configured for this Vercel deployment.</span>
+      </section>
+
+      <section id="page-dashboard" class="page active">
+        <div class="page-intro"><div><p class="eyebrow">AT A GLANCE</p><h2>Portfolio overview</h2><p class="muted">A live view of lending activity and receivables.</p></div><span class="environment-badge">DEVELOPMENT</span></div>
+        <div class="metric-grid" id="metrics"><article class="metric"><span>Customers</span><strong data-metric="totalCustomers">--</strong><small>Registered borrowers</small></article><article class="metric"><span>Loans</span><strong data-metric="totalLoans">--</strong><small>Total accounts</small></article><article class="metric accent"><span>Outstanding</span><strong data-metric="outstandingBalance">--</strong><small>Current receivables</small></article><article class="metric warm"><span>Overdue</span><strong data-metric="overdueBalance">--</strong><small>Requires attention</small></article></div>
+        <div class="content-grid"><section class="panel"><div class="panel-heading"><div><p class="eyebrow">PORTFOLIO HEALTH</p><h3>Loan status</h3></div><span class="panel-note">Live records only</span></div><div class="status-list"><div><span>Active loans</span><strong data-metric="activeLoans">--</strong></div><div><span>Overdue loans</span><strong data-metric="overdueLoans">--</strong></div><div><span>Paid loans</span><strong data-metric="paidLoans">--</strong></div><div><span>Closed loans</span><strong data-metric="closedLoans">--</strong></div></div></section><section class="panel dark-panel"><p class="eyebrow">RECEIVABLES</p><h3>Cash and interest</h3><div class="finance-row"><span>Principal disbursed</span><strong data-metric="principalDisbursed">--</strong></div><div class="finance-row"><span>Interest charged</span><strong data-metric="interestCharged">--</strong></div><div class="finance-row"><span>Payments received</span><strong data-metric="paymentsReceived">--</strong></div><div class="finance-row"><span>Collections</span><strong data-metric="totalCollections">--</strong></div></section></div>
+      </section>
+      <section id="page-placeholder" class="page"><div class="empty-panel"><span class="empty-icon">RL</span><p class="eyebrow">MODULE</p><h2 id="placeholder-title">Module</h2><p>This Vercel shell is connected to the same business contracts as the Apps Script application. Records will appear when the development API endpoint is configured.</p></div></section>
+    </main>
+  </div>
+  <script src="/vercel/app.js" defer></script>
+</body>
+</html>
