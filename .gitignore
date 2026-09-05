@@ -3,6 +3,7 @@
 .clasprc.json
 .env
 .env.*
+!.env.example
 
 # Credentials, secrets, and private keys
 credentials/

@@ -2,6 +2,7 @@
   "name": "richard-loans-vercel",
   "private": true,
   "version": "1.0.0",
+  "type": "module",
   "description": "Vercel frontend and API boundary for Richard Loans",
   "scripts": {
     "check": "node --check api/health.js && node --check api/proxy.js && node --check vercel/app.js"
