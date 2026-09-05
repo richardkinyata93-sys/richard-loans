@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan Management System</title>
+
+  <?!= include('Styles'); ?>
+</head>
+
+<body>
+
+  <!-- =========================================================
+       APPLICATION SHELL
+       ========================================================= -->
+  <div class="app-shell" id="appShell">
+
+    <!-- MOBILE OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- =======================================================
+         SIDEBAR
+         ======================================================= -->
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sidebar-header">
+
+        <div class="brand">
+          <div class="brand-icon">
+            <span>LM</span>
+          </div>
+
+          <div class="brand-text">
+            <div class="brand-title">Loan Manager</div>
+            <div class="brand-subtitle">Management System</div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="sidebar-close"
+          id="sidebarClose"
+          aria-label="Close menu">
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="sidebar-business">
+        <div class="business-label">BUSINESS</div>
+        <div class="business-name" id="sidebarBusinessName">
+          My Loan Business
+        </div>
+      </div>
+
+
+      <nav class="sidebar-nav" id="mainNavigation">
+
+        <div class="nav-section-label">MAIN</div>
+
+        <button
+          type="button"
+          class="nav-item active"
+          data-page="dashboard">
+          <span class="nav-icon">⌂</span>
+          <span class="nav-label">Dashboard</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="customers">
+          <span class="nav-icon">♙</span>
+          <span class="nav-label">Customers</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="loans">
+          <span class="nav-icon">▣</span>
+          <span class="nav-label">Loans</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="payments">
+          <span class="nav-icon">◉</span>
+          <span class="nav-label">Payments</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="collections">
+          <span class="nav-icon">☎</span>
+          <span class="nav-label">Collections</span>
+        </button>
+
+
+        <div class="nav-section-label">FINANCIAL</div>
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="interest">
+          <span class="nav-icon">%</span>
+          <span class="nav-label">Interest</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="transactions">
+          <span class="nav-icon">⇄</span>
+          <span class="nav-label">Transactions</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="reports">
+          <span class="nav-icon">▤</span>
+          <span class="nav-label">Reports</span>
+        </button>
+
+
+        <div class="nav-section-label">ADMINISTRATION</div>
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="audit">
+          <span class="nav-icon">✓</span>
+          <span class="nav-label">Audit Log</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="settings">
+          <span class="nav-icon">⚙</span>
+          <span class="nav-label">Settings</span>
+        </button>
+
+      </nav>
+
+
+      <div class="sidebar-footer">
+
+        <div class="system-version">
+          <span>System</span>
+          <strong id="sidebarVersion">v1.0.0</strong>
+        </div>
+
+        <div class="sidebar-user">
+          <div class="user-avatar" id="sidebarUserAvatar">A</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarUserName">
+              Administrator
+            </div>
+            <div class="user-role">Administrator</div>
+          </div>
+        </div>
+
+      </div>
+
+    </aside>
+
+
+    <!-- =======================================================
+         MAIN SHELL
+         ======================================================= -->
+    <div class="main-shell">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+
+        <div class="topbar-left">
+
+          <button
+            type="button"
+            class="mobile-menu-button"
+            id="mobileMenuButton"
+            aria-label="Open menu">
+            ☰
+          </button>
+
+          <div class="page-heading">
+
+            <h1 id="pageTitle">
+              Dashboard
+            </h1>
+
+            <p id="pageSubtitle">
+              Overview of your lending business
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="topbar-right">
+
+          <button
+            type="button"
+            class="topbar-action"
+            id="newCustomerButton">
+            <span>+</span>
+            <span>Customer</span>
+          </button>
+
+          <button
+            type="button"
+            class="topbar-action primary"
+            id="newLoanButton">
+            <span>+</span>
+            <span>New Loan</span>
+          </button>
+
+          <div
+            class="connection-status"
+            id="connectionStatus">
+
+            <span class="connection-dot"></span>
+
+            <span id="connectionStatusText">
+              Connecting...
+            </span>
+
+          </div>
+
+        </div>
+
+      </header>
+
+
+      <!-- =====================================================
+           MAIN CONTENT
+           ===================================================== -->
+      <main class="main-content">
+
+
+        <!-- ===================================================
+             DASHBOARD
+             =================================================== -->
+        <section
+          class="page-section active"
+          id="page-dashboard"
+          data-page-section="dashboard">
+
+          <div class="section-toolbar">
+
+            <div>
+              <h2>Business Overview</h2>
+              <p>Monitor customers, loans, collections and financial performance.</p>
+            </div>
+
+            <div class="toolbar-actions">
+
+              <button
+                type="button"
+                class="button secondary"
+                id="refreshDashboardButton">
+                ↻ Refresh
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- KPI CARDS -->
+          <div class="dashboard-cards">
+
+            <div class="stat-card">
+              <div class="stat-card-icon customers-icon">♙</div>
+
+              <div class="stat-card-content">
+                <div class="stat-label">Total Customers</div>
+                <div class="stat-value" id="dashTotalCustomers">0</div>
+                <div class="stat-foot">Registered customers</div>
+              </div>
+            </div>
+
+
+            <div class="stat-card">
+              <div class="stat-card-icon loans-icon">▣</div>
+
+              <div class="stat-card-content">
+                <div class="stat-label">Total Loans</div>
+                <div class="stat-value" id="dashTotalLoans">0</div>
+                <div class="stat-foot">All loans recorded</div>
+              </div>
+            </div>
+
+
+            <div class="stat-card">
+              <div class="stat-card-icon active-icon">●</div>
+
+              <div class="stat-card-content">
+                <div class="stat-label">Active Loans</div>
+                <div class="stat-value" id="dashActiveLoans">0</div>
+                <div class="stat-foot">Currently running</div>
+              </div>
+            </div>
+
+
+            <div class="stat-card warning-card">
+              <div class="stat-card-icon overdue-icon">!</div>
+
+              <div class="stat-card-content">
+                <div class="stat-label">Overdue Loans</div>
+                <div class="stat-value" id="dashOverdueLoans">0</div>
+                <div class="stat-foot">Require collection</div>
+              </div>
+            </div>
+
+          </div>
+
+
+          <!-- FINANCIAL SUMMARY -->
+          <div class="dashboard-financial-grid">
+
+            <div class="financial-card">
+              <div class="financial-label">Principal Disbursed</div>
+              <div
+                class="financial-value"
+                id="dashPrincipalDisbursed">
+                MWK 0.00
+              </div>
+            </div>
+
+            <div class="financial-card">
+              <div class="financial-label">Interest Charged</div>
+              <div
+                class="financial-value"
+                id="dashInterestCharged">
+                MWK 0.00
+              </div>
+            </div>
+
+            <div class="financial-card">
+              <div class="financial-label">Payments Received</div>
+              <div
+                class="financial-value"
+                id="dashPaymentsReceived">
+                MWK 0.00
+              </div>
+            </div>
+
+            <div class="financial-card highlight">
+              <div class="financial-label">Outstanding Balance</div>
+              <div
+                class="financial-value"
+                id="dashOutstandingBalance">
+                MWK 0.00
+              </div>
+            </div>
+
+          </div>
+
+
+          <!-- LOWER DASHBOARD -->
+          <div class="dashboard-lower-grid">
+
+            <!-- PORTFOLIO STATUS -->
+            <div class="panel">
+
+              <div class="panel-header">
+                <div>
+                  <h3>Loan Portfolio</h3>
+                  <p>Status distribution</p>
+                </div>
+              </div>
+
+              <div class="portfolio-status-list">
+
+                <div class="portfolio-row">
+                  <div class="portfolio-label">
+                    <span class="status-dot active"></span>
+                    Active
+                  </div>
+
+                  <strong id="dashStatusActive">0</strong>
+                </div>
+
+                <div class="portfolio-row">
+                  <div class="portfolio-label">
+                    <span class="status-dot overdue"></span>
+                    Overdue
+                  </div>
+
+                  <strong id="dashStatusOverdue">0</strong>
+                </div>
+
+                <div class="portfolio-row">
+                  <div class="portfolio-label">
+                    <span class="status-dot paid"></span>
+                    Paid
+                  </div>
+
+                  <strong id="dashStatusPaid">0</strong>
+                </div>
+
+                <div class="portfolio-row">
+                  <div class="portfolio-label">
+                    <span class="status-dot closed"></span>
+                    Closed
+                  </div>
+
+                  <strong id="dashStatusClosed">0</strong>
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- ALERTS -->
+            <div class="panel">
+
+              <div class="panel-header">
+                <div>
+                  <h3>Attention Required</h3>
+                  <p>Items requiring action</p>
+                </div>
+              </div>
+
+              <div class="alert-list">
+
+                <div class="alert-row">
+                  <div class="alert-icon danger">!</div>
+
+                  <div class="alert-content">
+                    <div class="alert-title">Overdue Loans</div>
+                    <div class="alert-text">
+                      Loans requiring collection follow-up
+                    </div>
+                  </div>
+
+                  <strong
+                    class="alert-number"
+                    id="dashAlertOverdue">
+                    0
+                  </strong>
+                </div>
+
+
+                <div class="alert-row">
+                  <div class="alert-icon warning">◷</div>
+
+                  <div class="alert-content">
+                    <div class="alert-title">Outstanding Promises</div>
+                    <div class="alert-text">
+                      Collection promises not fully received
+                    </div>
+                  </div>
+
+                  <strong
+                    class="alert-number"
+                    id="dashAlertPromises">
+                    0
+                  </strong>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="dashboard-footer-info">
+            Last updated:
+            <strong id="dashLastUpdated">—</strong>
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             CUSTOMERS
+             =================================================== -->
+        <section
+          class="page-section"
+          id="page-customers"
+          data-page-section="customers">
+
+          <div class="section-toolbar">
+
+            <div>
+              <h2>Customers</h2>
+              <p>Manage borrower profiles and customer information.</p>
+            </div>
+
+            <button
+              type="button"
+              class="button primary"
+              id="customersNewButton">
+              + New Customer
+            </button>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div class="table-toolbar">
+
+              <div class="search-box">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                  type="text"
+                  id="customerSearch"
+                  placeholder="Search by name, phone or customer ID...">
+
+              </div>
+
+              <button
+                type="button"
+                class="button secondary"
+                id="refreshCustomersButton">
+                ↻ Refresh
+              </button>
+
+            </div>
+
+
+            <div class="table-container">
+
+              <table class="data-table">
+
+                <thead>
+                  <tr>
+                    <th>Customer ID</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Occupation / Business</th>
+                    <th>Status</th>
+                    <th>Registered</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody id="customersTableBody">
+                  <tr>
+                    <td colspan="7" class="empty-state">
+                      Loading customers...
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             LOANS
+             =================================================== -->
+        <section
+          class="page-section"
+          id="page-loans"
+          data-page-section="loans">
+
+          <div class="section-toolbar">
+
+            <div>
+              <h2>Loans</h2>
+              <p>Manage applications, active loans and repayment status.</p>
+            </div>
+
+            <button
+              type="button"
+              class="button primary"
+              id="loansNewButton">
+              + New Loan
+            </button>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div class="table-toolbar">
+
+              <div class="search-box">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                  type="text"
+                  id="loanSearch"
+                  placeholder="Search by loan ID, customer name or customer ID...">
+
+              </div>
+
+              <button
+                type="button"
+                class="button secondary"
+                id="refreshLoansButton">
+                ↻ Refresh
+              </button>
+
+            </div>
+
+
+            <div class="table-container">
+
+              <table class="data-table">
+
+                <thead>
+                  <tr>
+                    <th>Loan ID</th>
+                    <th>Customer</th>
+                    <th>Principal</th>
+                    <th>Rate</th>
+                    <th>Due Date</th>
+                    <th>Outstanding</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody id="loansTableBody">
+                  <tr>
+                    <td colspan="8" class="empty-state">
+                      Loading loans...
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             PAYMENTS
+             =================================================== -->
+        <section
+          class="page-section"
+          id="page-payments"
+          data-page-section="payments">
+
+          <div class="section-toolbar">
+
+            <div>
+              <h2>Payments</h2>
+              <p>Record and review borrower repayments.</p>
+            </div>
+
+            <button
+              type="button"
+              class="button primary"
+              id="paymentsNewButton">
+              + Record Payment
+            </button>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div class="table-toolbar">
+
+              <div class="search-box">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                  type="text"
+                  id="paymentSearch"
+                  placeholder="Search payments by ID, loan or customer...">
+
+              </div>
+
+              <button
+                type="button"
+                class="button secondary"
+                id="refreshPaymentsButton">
+                ↻ Refresh
+              </button>
+
+            </div>
+
+
+            <div class="table-container">
+
+              <table class="data-table">
+
+                <thead>
+                  <tr>
+                    <th>Payment ID</th>
+                    <th>Date</th>
+                    <th>Loan ID</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Reference</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody id="paymentsTableBody">
+                  <tr>
+                    <td colspan="8" class="empty-state">
+                      Loading payments...
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             COLLECTIONS
+             =================================================== -->
+        <section
+          class="page-section"
+          id="page-collections"
+          data-page-section="collections">
+
+          <div class="section-toolbar">
+
+            <div>
+              <h2>Collections</h2>
+              <p>Track borrower contact, promises and collection activity.</p>
+            </div>
+
+            <button
+              type="button"
+              class="button primary"
+              id="collectionsNewButton">
+              + Collection Activity
+            </button>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div class="table-toolbar">
+
+              <div class="search-box">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                  type="text"
+                  id="collectionSearch"
+                  placeholder="Search collection activity...">
+
+              </div>
+
+              <button
+                type="button"
+                class="button secondary"
+                id="refreshCollectionsButton">
+                ↻ Refresh
+              </button>
+
+            </div>
+
+
+            <div class="table-container">
+
+              <table class="data-table">
+
+                <thead>
+                  <tr>
+                    <th>Collection ID</th>
+                    <th>Date</th>
+                    <th>Loan ID</th>
+                    <th>Customer</th>
+                    <th>Contact</th>
+                    <th>Promise Date</th>
+                    <th>Promised</th>
+                    <th>Received</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+
+                <tbody id="collectionsTableBody">
+                  <tr>
+                    <td colspan="9" class="empty-state">
+                      Loading collections...
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             INTEREST
+             =================================================== -->
+        <section
+          class="page-section"
+          id="page-interest"
+          data-page-section="interest">
+
+          <div class="section-toolbar">
+
+            <div>
+              <h2>Interest Ledger</h2>
+              <p>Review all interest events generated by the lending engine.</p>
+            </div>
+
+            <div class="toolbar-actions">
+
+              <button
+                type="button"
+                class="button secondary"
+                id="runInterestButton">
+                % Process Interest
+              </button>
+
+              <button
+                type="button"
+                class="button secondary"
+                id="refreshInterestButton">
+                ↻ Refresh
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div class="table-toolbar">
+
+              <div class="search-box">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                  type="text"
+                  id="interestSearch"
+                  placeholder="Search interest by ID, loan or customer...">
+
+              </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+              <table class="data-table">
+
+                <thead>
+                  <tr>
+                    <th>Interest ID</th>
+                    <th>Date</th>
+                    <th>Loan ID</th>
+                    <th>Period</th>
+                    <th>Opening Balance</th>
+                    <th>Rate</th>
+                    <th>Interest</th>
+                    <th>Closing Balance</th>
+                  </tr>
+                </thead>
+
+                <tbody id="interestTableBody">
+                  <tr>
+                    <td colspan="8" class="empty-state">
+                      Loading interest...
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             TRANSACTIONS
+             =================================================== -->
+        <section
+          class="page-section"
+          id="page-transactions"
+          data-page-section="transactions">
+
+          <div class="section-toolbar">
+
+            <div>
+              <h2>Transactions</h2>
+              <p>Financial transaction history and audit reference.</p>
+            </div>
+
+            <button
+              type="button"
+              class="button secondary"
+              id="refreshTransactionsButton">
+              ↻ Refresh
+            </button>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div class="table-toolbar">
+
+              <div class="search-box">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                  type="text"
+                  id="transactionSearch"
+                  placeholder="Search transactions...">
+
+              </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+              <table class="data-table">
+
+                <thead>
+                  <tr>
+                    <th>Transaction ID</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Loan ID</th>
+                    <th>Reference</th>
+                    <th>Amount</th>
+                    <th>Direction</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+
+                <tbody id="transactionsTableBody">
+                  <tr>
+                    <td colspan="8" class="empty-state">
+                      Loading transactions...
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             REPORTS
+             =================================================== -->
+        <section
+          class="page-section"
+          id="page-reports"
+          data-page-section="reports">
+
+          <div class="section-toolbar">
+
+            <div>
+              <h2>Reports</h2>
+              <p>Review lending, repayment and portfolio information.</p>
+            </div>
+
+            <button
+              type="button"
+              class="button secondary"
+              id="refreshReportsButton">
+              ↻ Refresh
+            </button>
+
+          </div>
+
+
+          <div id="reportsContent">
+
+            <div class="report-cards">
+
+              <div class="report-card">
+                <div class="report-card-label">Principal Disbursed</div>
+                <div class="report-card-value" id="reportPrincipal">
+                  MWK 0.00
+                </div>
+              </div>
+
+              <div class="report-card">
+                <div class="report-card-label">Interest Charged</div>
+                <div class="report-card-value" id="reportInterest">
+                  MWK 0.00
+                </div>
+              </div>
+
+              <div class="report-card">
+                <div class="report-card-label">Payments Received</div>
+                <div class="report-card-value" id="reportPayments">
+                  MWK 0.00
+                </div>
+              </div>
+
+              <div class="report-card">
+                <div class="report-card-label">Outstanding</div>
+                <div class="report-card-value" id="reportOutstanding">
+                  MWK 0.00
+                </div>
+              </div>
+
+            </div>
+
+
+            <div class="panel report-panel">
+
+              <div class="panel-header">
+                <div>
+                  <h3>Portfolio Summary</h3>
+                  <p>Current lending position</p>
+                </div>
+              </div>
+
+              <div id="reportsSummary">
+                Loading report...
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             AUDIT LOG
+             =================================================== -->
+        <section
+          class="page-section"
+          id="page-audit"
+          data-page-section="audit">
+
+          <div class="section-toolbar">
+
+            <div>
+              <h2>Audit Log</h2>
+              <p>System activity and financial record history.</p>
+            </div>
+
+            <button
+              type="button"
+              class="button secondary"
+              id="refreshAuditButton">
+              ↻ Refresh
+            </button>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div class="table-toolbar">
+
+              <div class="search-box">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                  type="text"
+                  id="auditSearch"
+                  placeholder="Search audit activity...">
+
+              </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+              <table class="data-table">
+
+                <thead>
+                  <tr>
+                    <th>Audit ID</th>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Sheet</th>
+                    <th>Record ID</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+
+                <tbody id="auditTableBody">
+                  <tr>
+                    <td colspan="7" class="empty-state">
+                      Loading audit log...
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             SETTINGS
+             =================================================== -->
+        <section
+          class="page-section"
+          id="page-settings"
+          data-page-section="settings">
+
+          <div class="section-toolbar">
+
+            <div>
+              <h2>Settings</h2>
+              <p>System configuration and lending defaults.</p>
+            </div>
+
+          </div>
+
+
+          <div class="settings-grid">
+
+            <div class="panel">
+
+              <div class="panel-header">
+                <div>
+                  <h3>Business Configuration</h3>
+                  <p>Current system settings</p>
+                </div>
+              </div>
+
+              <div class="settings-list">
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-label">Business Name</div>
+                    <div class="setting-description">
+                      Name displayed throughout the system.
+                    </div>
+                  </div>
+
+                  <strong id="settingBusinessName">—</strong>
+                </div>
+
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-label">Currency</div>
+                    <div class="setting-description">
+                      System financial currency.
+                    </div>
+                  </div>
+
+                  <strong id="settingCurrency">MWK</strong>
+                </div>
+
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-label">Default Interest Rate</div>
+                    <div class="setting-description">
+                      Default rate for newly created loans.
+                    </div>
+                  </div>
+
+                  <strong id="settingInterestRate">40.00%</strong>
+                </div>
+
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-label">Default Loan Term</div>
+                    <div class="setting-description">
+                      Default term for new loans.
+                    </div>
+                  </div>
+
+                  <strong id="settingLoanTerm">30 days</strong>
+                </div>
+
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-label">Grace Period</div>
+                    <div class="setting-description">
+                      Grace period before overdue treatment.
+                    </div>
+                  </div>
+
+                  <strong id="settingGracePeriod">0 days</strong>
+                </div>
+
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-label">Compounding</div>
+                    <div class="setting-description">
+                      Whether additional interest processing is enabled.
+                    </div>
+                  </div>
+
+                  <span
+                    class="status-badge active"
+                    id="settingCompounding">
+                    Enabled
+                  </span>
+                </div>
+
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-label">Payment Allocation</div>
+                    <div class="setting-description">
+                      Current payment allocation method.
+                    </div>
+                  </div>
+
+                  <strong id="settingAllocation">Outstanding Balance</strong>
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="panel">
+
+              <div class="panel-header">
+                <div>
+                  <h3>Automation</h3>
+                  <p>Daily interest processing</p>
+                </div>
+              </div>
+
+              <div class="automation-card">
+
+                <div class="automation-status">
+
+                  <div
+                    class="automation-indicator"
+                    id="automationIndicator">
+                  </div>
+
+                  <div>
+                    <div
+                      class="automation-title"
+                      id="automationTitle">
+                      Checking automation...
+                    </div>
+
+                    <div
+                      class="automation-description"
+                      id="automationDescription">
+                      Checking scheduled interest processing.
+                    </div>
+                  </div>
+
+                </div>
+
+
+                <div class="automation-actions">
+
+                  <button
+                    type="button"
+                    class="button primary"
+                    id="createAutomationButton">
+                    Enable Daily Automation
+                  </button>
+
+                  <button
+                    type="button"
+                    class="button secondary"
+                    id="removeAutomationButton">
+                    Disable
+                  </button>
+
+                  <button
+                    type="button"
+                    class="button secondary"
+                    id="runAutomationButton">
+                    Run Interest Now
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="panel system-info-panel">
+
+            <div class="panel-header">
+              <div>
+                <h3>System Information</h3>
+                <p>Application environment</p>
+              </div>
+            </div>
+
+            <div class="system-info-grid">
+
+              <div>
+                <span>System</span>
+                <strong id="systemName">—</strong>
+              </div>
+
+              <div>
+                <span>Version</span>
+                <strong id="systemVersion">—</strong>
+              </div>
+
+              <div>
+                <span>Spreadsheet</span>
+                <strong id="systemSpreadsheet">—</strong>
+              </div>
+
+              <div>
+                <span>Sheets</span>
+                <strong id="systemSheetCount">—</strong>
+              </div>
+
+              <div>
+                <span>Currency</span>
+                <strong id="systemCurrency">—</strong>
+              </div>
+
+              <div>
+                <span>Timezone</span>
+                <strong id="systemTimezone">—</strong>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             CUSTOMER DETAIL
+             =================================================== -->
+        <section
+          class="page-section detail-section"
+          id="page-customer-detail"
+          data-page-section="customer-detail">
+
+          <div class="detail-back">
+
+            <button
+              type="button"
+              class="button secondary"
+              id="backToCustomersButton">
+              ← Customers
+            </button>
+
+          </div>
+
+          <div id="customerDetailContent">
+            Loading customer...
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             LOAN DETAIL
+             =================================================== -->
+        <section
+          class="page-section detail-section"
+          id="page-loan-detail"
+          data-page-section="loan-detail">
+
+          <div class="detail-back">
+
+            <button
+              type="button"
+              class="button secondary"
+              id="backToLoansButton">
+              ← Loans
+            </button>
+
+          </div>
+
+          <div id="loanDetailContent">
+            Loading loan...
+          </div>
+
+        </section>
+
+
+      </main>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       MODAL OVERLAY
+       ========================================================= -->
+  <div
+    class="modal-overlay"
+    id="modalOverlay"
+    aria-hidden="true">
+
+    <div
+      class="modal"
+      id="mainModal"
+      role="dialog"
+      aria-modal="true">
+
+      <div class="modal-header">
+
+        <div>
+          <h2 id="modalTitle">Form</h2>
+          <p id="modalSubtitle"></p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          id="modalClose"
+          aria-label="Close">
+          ×
+        </button>
+
+      </div>
+
+      <div
+        class="modal-body"
+        id="modalBody">
+      </div>
+
+      <div
+        class="modal-footer"
+        id="modalFooter">
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       LOADING OVERLAY
+       ========================================================= -->
+  <div
+    class="loading-overlay"
+    id="loadingOverlay">
+
+    <div class="loading-card">
+
+      <div class="spinner"></div>
+
+      <div
+        class="loading-title"
+        id="loadingTitle">
+        Loading...
+      </div>
+
+      <div
+        class="loading-message"
+        id="loadingMessage">
+        Please wait.
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       TOAST
+       ========================================================= -->
+  <div
+    class="toast"
+    id="toast">
+
+    <div
+      class="toast-icon"
+      id="toastIcon">
+      ✓
+    </div>
+
+    <div class="toast-content">
+
+      <div
+        class="toast-title"
+        id="toastTitle">
+        Success
+      </div>
+
+      <div
+        class="toast-message"
+        id="toastMessage">
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="toast-close"
+      id="toastClose">
+      ×
+    </button>
+
+  </div>
+
+
+  <!-- =========================================================
+       ERROR BOUNDARY
+       ========================================================= -->
+  <div
+    class="fatal-error"
+    id="fatalError"
+    style="display:none;">
+
+    <div class="fatal-error-card">
+
+      <div class="fatal-error-icon">!</div>
+
+      <h2>Application Error</h2>
+
+      <p id="fatalErrorMessage">
+        The application could not start.
+      </p>
+
+      <button
+        type="button"
+        class="button primary"
+        onclick="window.location.reload();">
+        Reload Application
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <?!= include('JavaScript'); ?>
+  
+
+</body>
+</html>
