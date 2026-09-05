@@ -241,6 +241,3 @@ function testDashboard() {
 
   return result;
 }
-function getDashboardData() {
-  return refreshDashboard();
-}

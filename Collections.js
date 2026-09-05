@@ -577,30 +577,6 @@ function createCollection(data) {
 
 /**
  * Web-app function:
- * Get all collections.
- */
-function getCollections() {
-
-  return getAllCollections_();
-
-}
-
-
-/**
- * Web-app function:
- * Get collections for one loan.
- */
-function getLoanCollections(loanId) {
-
-  return getCollectionsForLoan_(
-    loanId
-  );
-
-}
-
-
-/**
- * Web-app function:
  * Get collections for one customer.
  */
 function getCustomerCollections(customerId) {

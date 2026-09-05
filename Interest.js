@@ -19,7 +19,7 @@
  * Format:
  * INT-00001
  */
-function generateInterestId_() {
+function legacyGenerateInterestId_() {
 
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -70,7 +70,7 @@ function generateInterestId_() {
  *
  * This is the main duplicate-protection mechanism.
  */
-function interestEntryExists_(
+function legacyInterestEntryExists_(
   loanId,
   periodNumber
 ) {
@@ -128,7 +128,7 @@ function interestEntryExists_(
 /**
  * Get all interest ledger entries.
  */
-function getAllInterestEntries_() {
+function legacyGetAllInterestEntries_() {
 
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -194,14 +194,14 @@ function getAllInterestEntries_() {
 /**
  * Get interest entries for a loan.
  */
-function getInterestForLoan_(loanId) {
+function legacyGetInterestForLoan_(loanId) {
 
   if (!loanId) {
     return [];
   }
 
   var entries =
-    getAllInterestEntries_();
+    legacyGetAllInterestEntries_();
 
   var searchLoanId =
     String(loanId).trim();
@@ -224,7 +224,7 @@ function getInterestForLoan_(loanId) {
  * This function also creates the corresponding
  * financial transaction.
  */
-function createInterestEntry_(data) {
+function legacyCreateInterestEntry_(data) {
 
   if (!data) {
     throw new Error(
@@ -317,7 +317,7 @@ function createInterestEntry_(data) {
    * Duplicate protection.
    */
   if (
-    interestEntryExists_(
+    legacyInterestEntryExists_(
       loanId,
       periodNumber
     )
@@ -333,7 +333,7 @@ function createInterestEntry_(data) {
   }
 
   var interestId =
-    generateInterestId_();
+    legacyGenerateInterestId_();
 
   var interestDate =
     data.interestDate
@@ -457,7 +457,7 @@ function createInterestEntry_(data) {
  * It simply creates the missing ledger record
  * representing the original interest.
  */
-function ensureInitialInterestLedger_(loan) {
+function legacyEnsureInitialInterestLedger_(loan) {
 
   if (!loan) {
     throw new Error('Loan information is required.');
@@ -474,7 +474,7 @@ function ensureInitialInterestLedger_(loan) {
    * If Period 0 already exists, do nothing.
    */
   if (
-    interestEntryExists_(
+    legacyInterestEntryExists_(
       loanId,
       0
     )
@@ -522,7 +522,7 @@ function ensureInitialInterestLedger_(loan) {
       : new Date();
 
   var result =
-    createInterestEntry_({
+    legacyCreateInterestEntry_({
 
       loanId: loanId,
 
@@ -569,7 +569,7 @@ function ensureInitialInterestLedger_(loan) {
  * Period 2 = 60 days after disbursement.
  * etc.
  */
-function calculateCompletedInterestPeriods_(
+function legacyCalculateCompletedInterestPeriods_(
   disbursementDate,
   today
 ) {
@@ -608,7 +608,7 @@ function calculateCompletedInterestPeriods_(
  *
  * This is the main compounding function.
  */
-function processInterestForLoan_(loanId) {
+function legacyProcessInterestForLoan_(loanId) {
 
   var lock =
     LockService.getScriptLock();
@@ -640,7 +640,7 @@ function processInterestForLoan_(loanId) {
      *
      * This does not double-charge it.
      */
-    ensureInitialInterestLedger_(loan);
+    legacyEnsureInitialInterestLedger_(loan);
 
     if (currentOutstanding <= 0) {
 
@@ -679,7 +679,7 @@ function processInterestForLoan_(loanId) {
     }
 
     var completedPeriods =
-      calculateCompletedInterestPeriods_(
+      legacyCalculateCompletedInterestPeriods_(
         loan.disbursementDate,
         new Date()
       );
@@ -689,7 +689,7 @@ function processInterestForLoan_(loanId) {
      * recorded.
      */
     var entries =
-      getInterestForLoan_(loanId);
+      legacyGetInterestForLoan_(loanId);
 
     var highestPeriod = -1;
 
@@ -748,7 +748,7 @@ function processInterestForLoan_(loanId) {
        * Double-check duplicate protection.
        */
       if (
-        interestEntryExists_(
+        legacyInterestEntryExists_(
           loanId,
           period
         )
@@ -788,7 +788,7 @@ function processInterestForLoan_(loanId) {
         (period * 30)
       );
 
-      createInterestEntry_({
+      legacyCreateInterestEntry_({
 
         loanId: loan.loanId,
 
@@ -860,7 +860,7 @@ function processInterestForLoan_(loanId) {
  * This is the function that will eventually
  * be run automatically every day.
  */
-function processInterest() {
+function legacyProcessInterest_() {
 
   var ss =
     SpreadsheetApp.getActiveSpreadsheet();
@@ -940,7 +940,7 @@ function processInterest() {
     try {
 
       var result =
-        processInterestForLoan_(
+        legacyProcessInterestForLoan_(
           loan.loanId
         );
 
@@ -1030,7 +1030,7 @@ function testInterestEngine_() {
   }
 
   var nextId =
-    generateInterestId_();
+    legacyGenerateInterestId_();
 
   var defaultRate =
     Number(
