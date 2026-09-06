@@ -1,14 +1,14 @@
 (() => {
-  const state = { dashboard: null };
+  const state = { dashboard: null, rows: [], columns: [] };
   const pages = {
-    dashboard: 'Portfolio overview',
-    customers: 'Customers',
-    loans: 'Loans',
-    payments: 'Payments',
-    collections: 'Collections',
-    ledger: 'Interest ledger',
-    reports: 'Reports',
-    settings: 'Settings'
+    dashboard: { title: 'Portfolio overview' },
+    customers: { title: 'Customers', method: 'getCustomers', description: 'Registered borrowers and account status.', columns: [['name', 'Customer'], ['phone', 'Phone'], ['customerStatus', 'Status'], ['registrationDate', 'Registered']] },
+    loans: { title: 'Loans', method: 'getLoans', description: 'Current lending accounts and receivables.', columns: [['loanId', 'Loan'], ['customerName', 'Customer'], ['principal', 'Principal', 'money'], ['outstandingBalance', 'Outstanding', 'money'], ['dueDate', 'Due date'], ['status', 'Status']] },
+    payments: { title: 'Payments', method: 'getPayments', description: 'Payments recorded against lending accounts.', columns: [['paymentDate', 'Date'], ['loanId', 'Loan'], ['customerName', 'Customer'], ['amount', 'Amount', 'money'], ['paymentMethod', 'Method'], ['reference', 'Reference']] },
+    collections: { title: 'Collections', method: 'getCollections', description: 'Collection activity and promises to pay.', columns: [['collectionDate', 'Date'], ['customerName', 'Customer'], ['phone', 'Phone'], ['amountPromised', 'Promised', 'money'], ['amountReceived', 'Received', 'money'], ['collectionStatus', 'Status']] },
+    ledger: { title: 'Interest ledger', method: 'getInterest', description: 'Interest periods recorded for loan accounts.', columns: [['interestDate', 'Date'], ['loanId', 'Loan'], ['periodNumber', 'Period'], ['openingBalance', 'Opening', 'money'], ['interestAmount', 'Interest', 'money'], ['closingBalance', 'Closing', 'money']] },
+    reports: { title: 'Reports', method: 'getDashboardData', description: 'Current portfolio totals from the live data source.', columns: [['label', 'Measure'], ['value', 'Value']] },
+    settings: { title: 'Settings', method: 'getSystemSettings', description: 'Configuration values used by the lending system.', columns: [['label', 'Setting'], ['value', 'Value']] }
   };
 
   const money = (value) => {
@@ -19,7 +19,7 @@
   };
 
   function setConnection(connected) {
-    document.getElementById('connection-label').textContent = connected ? 'Connected' : 'API not configured';
+    document.getElementById('connection-label').textContent = connected ? 'Connected' : 'API unavailable';
     document.querySelector('.status-dot').style.background = connected ? '#78c9a6' : '#d89032';
     document.getElementById('connection-notice').hidden = connected;
   }
@@ -44,15 +44,77 @@
     setConnection(true);
   }
 
+  async function request(method) {
+    const response = await fetch(`/api/proxy?method=${method}&_=${Date.now()}`, { cache: 'no-store', headers: { accept: 'application/json' } });
+    const payload = await response.json();
+    if (!response.ok || payload.success === false) throw new Error(payload.error || 'Request failed.');
+    return payload.data ?? payload;
+  }
+
+  const displayValue = (value, format) => {
+    if (value === null || value === undefined || value === '') return '--';
+    if (format === 'money') return money(value);
+    if (format === 'date') return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value));
+    return String(value);
+  };
+
+  function normaliseRows(page, data) {
+    if (page === 'settings') return Object.entries(data || {}).map(([label, value]) => ({ label, value }));
+    if (page === 'reports') return Object.entries(data || {}).map(([label, value]) => ({ label, value }));
+    return Array.isArray(data) ? data : [];
+  }
+
+  function renderRows(rows, columns) {
+    state.rows = rows;
+    state.columns = columns;
+    document.getElementById('module-head').innerHTML = `<tr>${columns.map((column) => `<th>${column[1]}</th>`).join('')}</tr>`;
+    const query = document.getElementById('module-search').value.trim().toLowerCase();
+    const filtered = rows.filter((row) => !query || columns.some(([key]) => String(row[key] ?? '').toLowerCase().includes(query)));
+    document.getElementById('record-count').textContent = `${filtered.length} record${filtered.length === 1 ? '' : 's'}`;
+    document.getElementById('module-body').innerHTML = filtered.length
+      ? filtered.map((row) => `<tr>${columns.map(([key, label, format]) => `<td>${displayValue(row[key], format)}</td>`).join('')}</tr>`).join('')
+      : `<tr><td class="table-empty" colspan="${columns.length}">No records found.</td></tr>`;
+  }
+
+  function showModuleStatus(message) {
+    const element = document.getElementById('module-status');
+    element.textContent = message;
+    element.hidden = !message;
+  }
+
+  async function loadModule(page) {
+    const config = pages[page];
+    document.getElementById('module-eyebrow').textContent = page === 'ledger' ? 'INTEREST LEDGER' : page.toUpperCase();
+    document.getElementById('module-title').textContent = config.title;
+    document.getElementById('module-description').textContent = config.description;
+    document.getElementById('module-search').value = '';
+    showModuleStatus('Loading live records...');
+    document.getElementById('module-body').innerHTML = '';
+    try {
+      const data = await request(config.method);
+      renderRows(normaliseRows(page, data), config.columns);
+      showModuleStatus('');
+      setConnection(true);
+    } catch (error) {
+      showModuleStatus(error.message);
+      document.getElementById('record-count').textContent = '';
+      setConnection(false);
+    }
+  }
+
   function navigate(page) {
     document.querySelectorAll('.nav-link').forEach((link) => link.classList.toggle('active', link.dataset.page === page));
-    document.getElementById('page-dashboard').classList.toggle('active', page === 'dashboard');
-    document.getElementById('page-placeholder').classList.toggle('active', page !== 'dashboard');
-    document.getElementById('page-title').textContent = pages[page] || pages.dashboard;
-    if (page !== 'dashboard') document.getElementById('placeholder-title').textContent = pages[page] || 'Module';
+    const dashboard = page === 'dashboard';
+    document.getElementById('page-dashboard').classList.toggle('active', dashboard);
+    document.getElementById('page-dashboard').hidden = !dashboard;
+    document.getElementById('page-module').hidden = dashboard;
+    document.getElementById('page-title').textContent = pages[page].title;
+    document.getElementById('sidebar').classList.remove('open');
+    if (!dashboard) loadModule(page);
   }
 
   document.querySelectorAll('.nav-link').forEach((link) => link.addEventListener('click', () => navigate(link.dataset.page)));
+  document.getElementById('module-search').addEventListener('input', () => renderRows(state.rows, state.columns));
   document.getElementById('refresh-button').addEventListener('click', () => loadDashboard().catch(() => setConnection(false)));
   document.getElementById('menu-button').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
   document.getElementById('today-label').textContent = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date());
