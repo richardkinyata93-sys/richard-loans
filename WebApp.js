@@ -962,6 +962,60 @@ function getSystemSettings() {
 
 
 /**
+ * Update system settings from the private admin frontend.
+ */
+function updateSystemSettings(data) {
+
+  var settings = data && data.settings
+    ? data.settings
+    : data || {};
+
+  if (!settings || typeof settings !== 'object') {
+    throw new Error('Settings data is required.');
+  }
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetName =
+    typeof SYSTEM !== 'undefined' && SYSTEM.SHEETS
+      ? SYSTEM.SHEETS.SETTINGS
+      : 'Settings';
+  var sheet = ss.getSheetByName(sheetName);
+
+  if (!sheet) {
+    throw new Error('Settings sheet not found.');
+  }
+
+  var lastRow = sheet.getLastRow();
+  var rows = lastRow >= 2
+    ? sheet.getRange(2, 1, lastRow - 1, 2).getValues()
+    : [];
+  var rowByKey = {};
+
+  rows.forEach(function(row, index) {
+    var key = String(row[0] || '').trim();
+    if (key) rowByKey[key] = index + 2;
+  });
+
+  Object.keys(settings).forEach(function(key) {
+    var cleanKey = String(key || '').trim();
+    if (!cleanKey) return;
+    var value = settings[key];
+    if (rowByKey[cleanKey]) {
+      sheet.getRange(rowByKey[cleanKey], 2).setValue(value);
+    } else {
+      sheet.appendRow([cleanKey, value]);
+    }
+  });
+
+  if (typeof audit_ === 'function') {
+    audit_('UPDATE_SETTINGS', sheetName, '', 'Updated system settings');
+  }
+
+  return getSystemSettings();
+}
+
+
+/**
  * =====================================================
  * SYSTEM INFORMATION
  * =====================================================

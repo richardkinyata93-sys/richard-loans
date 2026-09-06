@@ -18,7 +18,8 @@ export default async function handler(request, response) {
     'createCustomerFromWebApp',
     'createLoanFromWebApp',
     'recordPaymentFromWebApp',
-    'recordCollectionFromWebApp'
+    'recordCollectionFromWebApp',
+    'updateSystemSettings'
   ]);
 
   if (!endpoint) {

@@ -7,7 +7,9 @@
     payments: { title: 'Payments', method: 'getPayments', description: 'Payments recorded against lending accounts.', columns: [['paymentDate', 'Date'], ['loanId', 'Loan'], ['customerName', 'Customer'], ['amount', 'Amount', 'money'], ['paymentMethod', 'Method'], ['reference', 'Reference']] },
     collections: { title: 'Collections', method: 'getCollections', description: 'Collection activity and promises to pay.', columns: [['collectionDate', 'Date'], ['customerName', 'Customer'], ['phone', 'Phone'], ['amountPromised', 'Promised', 'money'], ['amountReceived', 'Received', 'money'], ['collectionStatus', 'Status']] },
     ledger: { title: 'Interest ledger', method: 'getInterest', description: 'Interest periods recorded for loan accounts.', columns: [['interestDate', 'Date'], ['loanId', 'Loan'], ['periodNumber', 'Period'], ['openingBalance', 'Opening', 'money'], ['interestAmount', 'Interest', 'money'], ['closingBalance', 'Closing', 'money']] },
+    transactions: { title: 'Transactions', method: 'getTransactions', description: 'Financial transaction history and audit reference.', columns: [['transactionDate', 'Date'], ['transactionType', 'Type'], ['loanId', 'Loan'], ['amount', 'Amount', 'money'], ['direction', 'Direction'], ['description', 'Description']] },
     reports: { title: 'Reports', method: 'getDashboardData', description: 'Current portfolio totals from the live data source.', columns: [['label', 'Measure'], ['value', 'Value']] },
+    audit: { title: 'Audit log', method: 'getAuditLog', description: 'System activity and financial record history.', columns: [['timestamp', 'Date'], ['action', 'Action'], ['user', 'User'], ['sheetName', 'Sheet'], ['recordId', 'Record'], ['description', 'Description']] },
     settings: { title: 'Settings', method: 'getSystemSettings', description: 'Configuration values used by the lending system.', columns: [['label', 'Setting'], ['value', 'Value']] }
   };
 
@@ -94,8 +96,8 @@
     document.getElementById('module-eyebrow').textContent = page === 'ledger' ? 'INTEREST LEDGER' : page.toUpperCase();
     document.getElementById('module-title').textContent = config.title;
     document.getElementById('module-description').textContent = config.description;
-    document.getElementById('module-actions').innerHTML = ['payments', 'collections'].includes(page)
-      ? `<button class="action-button primary" data-open-form="${page === 'payments' ? 'payment' : 'collection'}">+ ${page === 'payments' ? 'Payment' : 'Collection'}</button>`
+    document.getElementById('module-actions').innerHTML = ['payments', 'collections', 'settings'].includes(page)
+      ? `<button class="action-button primary" data-open-form="${page === 'payments' ? 'payment' : page === 'collections' ? 'collection' : 'settings'}">${page === 'settings' ? 'Edit settings' : `+ ${page === 'payments' ? 'Payment' : 'Collection'}`}</button>`
       : '';
     document.getElementById('module-search').value = '';
     showModuleStatus('Loading live records...');
@@ -146,16 +148,23 @@
       title: 'Record collection', method: 'recordCollectionFromWebApp', fields: [
         ['loanId', 'Loan ID', 'text', true], ['promiseToPayDate', 'Promise date', 'date'], ['amountPromised', 'Amount promised (MWK)', 'number'], ['amountReceived', 'Amount received (MWK)', 'number'], ['contactMethod', 'Contact method', 'text'], ['collectionStatus', 'Status', 'text'], ['notes', 'Notes', 'textarea']
       ]
+    },
+    settings: {
+      title: 'Edit settings', method: 'updateSystemSettings', fields: []
     }
   };
 
   function openForm(type) {
     const definition = formDefinitions[type];
     if (!definition) return;
+    if (type === 'settings') {
+      definition.fields = state.rows.map((row) => [`setting_${row.label}`, row.label, 'text']);
+    }
     state.activeForm = type;
     document.getElementById('entry-title').textContent = definition.title;
     document.getElementById('entry-status').hidden = true;
     document.getElementById('entry-form').innerHTML = definition.fields.map(([name, label, inputType, required]) => `<label class="form-field"><span>${label}${required ? ' *' : ''}</span>${inputType === 'textarea' ? `<textarea name="${name}" rows="3" ${required ? 'required' : ''}></textarea>` : `<input name="${name}" type="${inputType}" ${required ? 'required' : ''}>`}</label>`).join('');
+    if (type === 'settings') state.rows.forEach((row) => { const input = document.querySelector(`[name="setting_${CSS.escape(row.label)}"]`); if (input) input.value = row.value ?? ''; });
     document.getElementById('entry-modal').hidden = false;
   }
 
@@ -173,6 +182,10 @@
     const button = document.getElementById('save-entry');
     const status = document.getElementById('entry-status');
     const data = Object.fromEntries(new FormData(event.currentTarget).entries());
+    if (formType === 'settings') {
+      data.settings = {};
+      Object.entries(data).forEach(([key, value]) => { if (key.startsWith('setting_')) data.settings[key.slice(8)] = value; });
+    }
     button.disabled = true;
     status.textContent = 'Saving record...';
     status.hidden = false;
