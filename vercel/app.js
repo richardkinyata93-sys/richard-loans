@@ -34,7 +34,10 @@
   }
 
   async function loadDashboard() {
-    const response = await fetch('/api/proxy?method=getDashboardData', { headers: { accept: 'application/json' } });
+    const response = await fetch(`/api/proxy?method=getDashboardData&_=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { accept: 'application/json' }
+    });
     const payload = await response.json();
     if (!response.ok || payload.success === false) throw new Error(payload.error || 'Dashboard request failed.');
     renderDashboard(payload.data || payload);
