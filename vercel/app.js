@@ -1,5 +1,5 @@
 (() => {
-  const state = { dashboard: null, rows: [], columns: [], moduleRequest: 0 };
+  const state = { dashboard: null, rows: [], columns: [], moduleRequest: 0, activeForm: null };
   const pages = {
     dashboard: { title: 'Portfolio overview' },
     customers: { title: 'Customers', method: 'getCustomers', description: 'Registered borrowers and account status.', columns: [['name', 'Customer'], ['phone', 'Phone'], ['customerStatus', 'Status'], ['registrationDate', 'Registered']] },
@@ -44,8 +44,14 @@
     setConnection(true);
   }
 
-  async function request(method) {
-    const response = await fetch(`/api/proxy?method=${method}&_=${Date.now()}`, { cache: 'no-store', headers: { accept: 'application/json' } });
+  async function request(method, args = []) {
+    const writing = args.length > 0;
+    const response = await fetch(`/api/proxy?method=${method}&_=${Date.now()}`, {
+      method: writing ? 'POST' : 'GET',
+      cache: 'no-store',
+      headers: { accept: 'application/json', 'content-type': 'application/json' },
+      body: writing ? JSON.stringify({ args }) : undefined
+    });
     const payload = await response.json();
     if (!response.ok || payload.success === false) throw new Error(payload.error || 'Request failed.');
     return payload.data ?? payload;
@@ -88,6 +94,9 @@
     document.getElementById('module-eyebrow').textContent = page === 'ledger' ? 'INTEREST LEDGER' : page.toUpperCase();
     document.getElementById('module-title').textContent = config.title;
     document.getElementById('module-description').textContent = config.description;
+    document.getElementById('module-actions').innerHTML = ['payments', 'collections'].includes(page)
+      ? `<button class="action-button primary" data-open-form="${page === 'payments' ? 'payment' : 'collection'}">+ ${page === 'payments' ? 'Payment' : 'Collection'}</button>`
+      : '';
     document.getElementById('module-search').value = '';
     showModuleStatus('Loading live records...');
     document.getElementById('module-body').innerHTML = '';
@@ -115,7 +124,80 @@
     if (!dashboard) loadModule(page);
   }
 
+  const formDefinitions = {
+    customer: {
+      title: 'New customer', method: 'createCustomerFromWebApp', fields: [
+        ['name', 'Full name', 'text', true], ['phone', 'Phone number', 'text', true], ['alternativePhone', 'Alternative phone', 'text'],
+        ['address', 'Address', 'text'], ['idReference', 'ID / reference', 'text'], ['occupationBusiness', 'Occupation / business', 'text'], ['notes', 'Notes', 'textarea']
+      ]
+    },
+    loan: {
+      title: 'New loan', method: 'createLoanFromWebApp', fields: [
+        ['customerId', 'Customer ID', 'text', true], ['principal', 'Principal (MWK)', 'number', true], ['interestRate', 'Interest rate', 'number'],
+        ['termDays', 'Term (days)', 'number'], ['loanPurpose', 'Loan purpose', 'text'], ['disbursementMethod', 'Disbursement method', 'text'], ['notes', 'Notes', 'textarea']
+      ]
+    },
+    payment: {
+      title: 'Record payment', method: 'recordPaymentFromWebApp', fields: [
+        ['loanId', 'Loan ID', 'text', true], ['amount', 'Amount (MWK)', 'number', true], ['paymentMethod', 'Payment method', 'text'], ['reference', 'Reference', 'text'], ['notes', 'Notes', 'textarea']
+      ]
+    },
+    collection: {
+      title: 'Record collection', method: 'recordCollectionFromWebApp', fields: [
+        ['loanId', 'Loan ID', 'text', true], ['promiseToPayDate', 'Promise date', 'date'], ['amountPromised', 'Amount promised (MWK)', 'number'], ['amountReceived', 'Amount received (MWK)', 'number'], ['contactMethod', 'Contact method', 'text'], ['collectionStatus', 'Status', 'text'], ['notes', 'Notes', 'textarea']
+      ]
+    }
+  };
+
+  function openForm(type) {
+    const definition = formDefinitions[type];
+    if (!definition) return;
+    state.activeForm = type;
+    document.getElementById('entry-title').textContent = definition.title;
+    document.getElementById('entry-status').hidden = true;
+    document.getElementById('entry-form').innerHTML = definition.fields.map(([name, label, inputType, required]) => `<label class="form-field"><span>${label}${required ? ' *' : ''}</span>${inputType === 'textarea' ? `<textarea name="${name}" rows="3" ${required ? 'required' : ''}></textarea>` : `<input name="${name}" type="${inputType}" ${required ? 'required' : ''}>`}</label>`).join('');
+    document.getElementById('entry-modal').hidden = false;
+  }
+
+  function closeForm() {
+    document.getElementById('entry-modal').hidden = true;
+    document.getElementById('entry-form').reset();
+    state.activeForm = null;
+  }
+
+  async function submitForm(event) {
+    event.preventDefault();
+    const definition = formDefinitions[state.activeForm];
+    if (!definition) return;
+    const formType = state.activeForm;
+    const button = document.getElementById('save-entry');
+    const status = document.getElementById('entry-status');
+    const data = Object.fromEntries(new FormData(event.currentTarget).entries());
+    button.disabled = true;
+    status.textContent = 'Saving record...';
+    status.hidden = false;
+    try {
+      await request(definition.method, [data]);
+      closeForm();
+      setConnection(true);
+      if (formType === 'customer' || formType === 'loan') await loadDashboard();
+      const activePage = document.querySelector('.nav-link.active')?.dataset.page;
+      if (activePage && activePage !== 'dashboard' && pages[activePage].method) await loadModule(activePage);
+    } catch (error) {
+      status.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   document.querySelectorAll('.nav-link').forEach((link) => link.addEventListener('click', () => navigate(link.dataset.page)));
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-open-form]');
+    if (trigger) openForm(trigger.dataset.openForm);
+  });
+  document.getElementById('entry-form').addEventListener('submit', submitForm);
+  document.getElementById('close-entry').addEventListener('click', closeForm);
+  document.getElementById('cancel-entry').addEventListener('click', closeForm);
   document.getElementById('module-search').addEventListener('input', () => renderRows(state.rows, state.columns));
   document.getElementById('refresh-button').addEventListener('click', () => loadDashboard().catch(() => setConnection(false)));
   document.getElementById('menu-button').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));

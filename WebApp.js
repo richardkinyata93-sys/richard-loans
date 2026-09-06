@@ -1390,7 +1390,11 @@ function doPost(event) {
     getReports: true,
     getAuditLog: true,
     getSystemSettings: true,
-    getWebAppAutomationStatus: true
+    getWebAppAutomationStatus: true,
+    createCustomerFromWebApp: true,
+    createLoanFromWebApp: true,
+    recordPaymentFromWebApp: true,
+    recordCollectionFromWebApp: true
   };
 
   try {

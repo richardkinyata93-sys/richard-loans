@@ -31,7 +31,7 @@
       <header class="topbar">
         <button class="menu-button" id="menu-button" aria-label="Open navigation">Menu</button>
         <div><p class="eyebrow">LENDING OPERATIONS</p><h1 id="page-title">Portfolio overview</h1></div>
-        <div class="topbar-meta"><span class="date-label" id="today-label"></span><button class="icon-button" id="refresh-button" aria-label="Refresh dashboard">↻</button></div>
+        <div class="topbar-meta"><span class="date-label" id="today-label"></span><button class="action-button" data-open-form="customer">+ Customer</button><button class="action-button primary" data-open-form="loan">+ Loan</button><button class="icon-button" id="refresh-button" aria-label="Refresh dashboard">↻</button></div>
       </header>
 
       <section class="notice" id="connection-notice" hidden>
@@ -46,11 +46,19 @@
       </section>
       <section id="page-module" class="page" hidden>
         <div class="page-intro"><div><p class="eyebrow" id="module-eyebrow">MODULE</p><h2 id="module-title">Module</h2><p class="muted" id="module-description"></p></div><span class="environment-badge">READ ONLY</span></div>
-        <div class="module-toolbar"><label class="search-field"><span>Filter records</span><input id="module-search" type="search" placeholder="Search this module" autocomplete="off"></label><span class="record-count" id="record-count"></span></div>
+        <div class="module-toolbar"><label class="search-field"><span>Filter records</span><input id="module-search" type="search" placeholder="Search this module" autocomplete="off"></label><div class="module-toolbar-right"><span class="record-count" id="record-count"></span><span id="module-actions"></span></div></div>
         <div id="module-status" class="module-status" role="status" hidden></div>
         <div class="table-wrap"><table class="data-table"><thead id="module-head"></thead><tbody id="module-body"></tbody></table></div>
       </section>
     </main>
+  </div>
+  <div class="modal-backdrop" id="entry-modal" hidden>
+    <section class="entry-modal" role="dialog" aria-modal="true" aria-labelledby="entry-title">
+      <div class="modal-heading"><div><p class="eyebrow">ADMIN ENTRY</p><h2 id="entry-title">New record</h2></div><button class="icon-button" id="close-entry" aria-label="Close entry form">×</button></div>
+      <form id="entry-form"></form>
+      <div id="entry-status" class="module-status" role="status" hidden></div>
+      <div class="modal-actions"><button type="button" class="action-button" id="cancel-entry">Cancel</button><button type="submit" class="action-button primary" form="entry-form" id="save-entry">Save record</button></div>
+    </section>
   </div>
   <script src="/vercel/app.js?v=modules-20260905" defer></script>
 </body>

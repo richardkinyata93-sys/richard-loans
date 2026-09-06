@@ -14,7 +14,11 @@ export default async function handler(request, response) {
     'getReports',
     'getAuditLog',
     'getSystemSettings',
-    'getWebAppAutomationStatus'
+    'getWebAppAutomationStatus',
+    'createCustomerFromWebApp',
+    'createLoanFromWebApp',
+    'recordPaymentFromWebApp',
+    'recordCollectionFromWebApp'
   ]);
 
   if (!endpoint) {
