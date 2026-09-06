@@ -126,6 +126,7 @@
       : '';
     document.getElementById('module-search').value = '';
     showModuleStatus('Loading live records...');
+    document.getElementById('record-count').textContent = '';
     document.getElementById('module-body').innerHTML = '';
     try {
       const data = await request(config.method);
