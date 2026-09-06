@@ -1,5 +1,5 @@
 (() => {
-  const state = { dashboard: null, rows: [], columns: [], moduleRequest: 0, activeForm: null };
+  const state = { dashboard: null, rows: [], columns: [], moduleRequest: 0, activeForm: null, dashboardRequest: 0 };
   const pages = {
     dashboard: { title: 'Portfolio overview' },
     customers: { title: 'Customers', method: 'getCustomers', description: 'Registered borrowers and account status.', columns: [['name', 'Customer'], ['phone', 'Phone'], ['customerStatus', 'Status'], ['registrationDate', 'Registered']] },
@@ -33,17 +33,41 @@
       const value = state.dashboard[key];
       element.textContent = key.toLowerCase().includes('balance') || key.toLowerCase().includes('disbursed') || key.toLowerCase().includes('charged') || key.toLowerCase().includes('received') || key.toLowerCase().includes('collections') ? money(value) : (value ?? '--');
     });
+    document.getElementById('last-updated').textContent = data.lastUpdated ? `Updated ${displayValue(data.lastUpdated, 'date')}` : 'Live data';
   }
 
   async function loadDashboard() {
+    const requestId = ++state.dashboardRequest;
     const response = await fetch(`/api/proxy?method=getDashboardData&_=${Date.now()}`, {
       cache: 'no-store',
       headers: { accept: 'application/json' }
     });
     const payload = await response.json();
     if (!response.ok || payload.success === false) throw new Error(payload.error || 'Dashboard request failed.');
-    renderDashboard(payload.data || payload);
+    if (requestId !== state.dashboardRequest) return;
+    const dashboard = payload.data || payload;
+    renderDashboard(dashboard);
+    const [loans, collections, payments] = await Promise.all([request('getLoans'), request('getCollections'), request('getPayments')]);
+    if (requestId !== state.dashboardRequest) return;
+    renderAttention(collections, loans);
+    renderActivity(payments);
     setConnection(true);
+  }
+
+  function renderAttention(collections, loans) {
+    const list = document.getElementById('attention-list');
+    const items = (collections || []).slice().sort((a, b) => new Date(a.promiseToPayDate || a.collectionDate) - new Date(b.promiseToPayDate || b.collectionDate)).slice(0, 3);
+    if (!items.length && !(loans || []).some((loan) => Number(loan.daysOverdue) > 0)) {
+      list.innerHTML = '<div class="empty-state"><strong>Portfolio is on track</strong><span>No overdue collections require attention.</span></div>';
+      return;
+    }
+    list.innerHTML = items.map((item) => `<div class="attention-row"><span class="attention-icon">!</span><div><strong>${item.customerName || item.loanId}</strong><small>${item.collectionStatus || 'Collection'} · ${displayValue(item.promiseToPayDate || item.collectionDate, 'date')}</small></div><b>${money(item.amountPromised)}</b></div>`).join('');
+  }
+
+  function renderActivity(payments) {
+    const list = document.getElementById('activity-list');
+    const items = (payments || []).slice().sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate)).slice(0, 4);
+    list.innerHTML = items.length ? items.map((item) => `<div class="activity-row"><span class="activity-icon">↓</span><div><strong>${item.customerName || item.loanId}</strong><small>${item.paymentMethod || 'Payment'} · ${displayValue(item.paymentDate, 'date')}</small></div><b>${money(item.amount)}</b></div>`).join('') : '<div class="empty-state"><strong>No payments recorded</strong><span>New payment activity will appear here.</span></div>';
   }
 
   async function request(method, args = []) {
@@ -204,6 +228,10 @@
   }
 
   document.querySelectorAll('.nav-link').forEach((link) => link.addEventListener('click', () => navigate(link.dataset.page)));
+  document.addEventListener('click', (event) => {
+    const pageLink = event.target.closest('[data-page-link]');
+    if (pageLink) navigate(pageLink.dataset.pageLink);
+  });
   document.addEventListener('click', (event) => {
     const trigger = event.target.closest('[data-open-form]');
     if (trigger) openForm(trigger.dataset.openForm);
