@@ -31,7 +31,8 @@
     document.querySelectorAll('[data-metric]').forEach((element) => {
       const key = element.dataset.metric;
       const value = state.dashboard[key];
-      element.textContent = key.toLowerCase().includes('balance') || key.toLowerCase().includes('disbursed') || key.toLowerCase().includes('charged') || key.toLowerCase().includes('received') || key.toLowerCase().includes('collections') ? money(value) : (value ?? '--');
+      const monetary = ['balance', 'disbursed', 'charged', 'received', 'collections', 'promises'].some((term) => key.toLowerCase().includes(term));
+      element.textContent = monetary ? money(value) : (value ?? '--');
     });
     document.getElementById('last-updated').textContent = data.lastUpdated ? `Updated ${displayValue(data.lastUpdated, 'date')}` : 'Live data';
   }
@@ -133,6 +134,7 @@
       showModuleStatus('');
       setConnection(true);
     } catch (error) {
+      if (requestId !== state.moduleRequest) return;
       showModuleStatus(error.message);
       document.getElementById('record-count').textContent = '';
       setConnection(false);
