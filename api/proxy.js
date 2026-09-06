@@ -14,7 +14,7 @@ export default async function handler(request, response) {
     'getReports',
     'getAuditLog',
     'getSystemSettings',
-    'getAutomationStatus'
+    'getWebAppAutomationStatus'
   ]);
 
   if (!endpoint) {

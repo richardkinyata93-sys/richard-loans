@@ -1390,7 +1390,7 @@ function doPost(event) {
     getReports: true,
     getAuditLog: true,
     getSystemSettings: true,
-    getAutomationStatus: true
+    getWebAppAutomationStatus: true
   };
 
   try {

@@ -1,5 +1,5 @@
 (() => {
-  const state = { dashboard: null, rows: [], columns: [] };
+  const state = { dashboard: null, rows: [], columns: [], moduleRequest: 0 };
   const pages = {
     dashboard: { title: 'Portfolio overview' },
     customers: { title: 'Customers', method: 'getCustomers', description: 'Registered borrowers and account status.', columns: [['name', 'Customer'], ['phone', 'Phone'], ['customerStatus', 'Status'], ['registrationDate', 'Registered']] },
@@ -84,6 +84,7 @@
 
   async function loadModule(page) {
     const config = pages[page];
+    const requestId = ++state.moduleRequest;
     document.getElementById('module-eyebrow').textContent = page === 'ledger' ? 'INTEREST LEDGER' : page.toUpperCase();
     document.getElementById('module-title').textContent = config.title;
     document.getElementById('module-description').textContent = config.description;
@@ -92,6 +93,7 @@
     document.getElementById('module-body').innerHTML = '';
     try {
       const data = await request(config.method);
+      if (requestId !== state.moduleRequest) return;
       renderRows(normaliseRows(page, data), config.columns);
       showModuleStatus('');
       setConnection(true);
