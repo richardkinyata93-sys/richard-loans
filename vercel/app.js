@@ -146,6 +146,7 @@
     document.querySelectorAll('.nav-link').forEach((link) => link.classList.toggle('active', link.dataset.page === page));
     const dashboard = page === 'dashboard';
     document.getElementById('page-dashboard').classList.toggle('active', dashboard);
+    document.getElementById('page-module').classList.toggle('active', !dashboard);
     document.getElementById('page-dashboard').hidden = !dashboard;
     document.getElementById('page-module').hidden = dashboard;
     document.getElementById('page-title').textContent = pages[page].title;
