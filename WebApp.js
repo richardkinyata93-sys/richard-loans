@@ -44,11 +44,11 @@ function doGet() {
  * =====================================================
  */
 
-      success: false,
-      error: error.message,
-      message: error.message
-    };
-  }
+function include(filename) {
+
+  return HtmlService
+    .createHtmlOutputFromFile(filename)
+    .getContent();
 }
 
 
@@ -1366,88 +1366,6 @@ function testGetCustomersDirectly() {
       2
     )
   );
-}
-
-
-/**
- * Read-only HTTP boundary for the Vercel frontend.
- */
-function doPost(event) {
-
-  var allowedMethods = {
-    getDashboardData: true,
-    getSystemInfo: true,
-    getSystemHealth: true,
-    getCustomers: true,
-    getLoans: true,
-    getPayments: true,
-    getCollections: true,
-    getInterest: true,
-    getTransactions: true,
-    getReports: true,
-    getAuditLog: true,
-    getSystemSettings: true,
-    getAutomationStatus: true
-  };
-
-  try {
-
-    var body =
-      event &&
-      event.postData &&
-      event.postData.contents
-        ? JSON.parse(event.postData.contents)
-        : {};
-
-    var method =
-      String(body.method || '').trim();
-
-    var args =
-      Array.isArray(body.args)
-        ? body.args
-        : [];
-
-    if (!allowedMethods[method]) {
-      throw new Error(
-        'HTTP method is not available.'
-      );
-    }
-
-    var handler =
-      typeof globalThis[method] === 'function'
-        ? globalThis[method]
-        : null;
-
-    if (!handler) {
-      throw new Error(
-        'HTTP method is not implemented.'
-      );
-    }
-
-    var result =
-      handler.apply(null, args);
-
-    return ContentService
-      .createTextOutput(
-        JSON.stringify(result)
-      )
-      .setMimeType(
-        ContentService.MimeType.JSON
-      );
-
-  } catch (error) {
-
-    return ContentService
-      .createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: error.message
-        })
-      )
-      .setMimeType(
-        ContentService.MimeType.JSON
-      );
-  }
 }
 
 

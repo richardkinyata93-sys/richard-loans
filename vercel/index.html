@@ -35,16 +35,16 @@
       </header>
 
       <section class="notice" id="connection-notice" hidden>
-        <strong>Development connection required</strong>
+        <strong>Data connection required</strong>
         <span>Financial data is not available until the Apps Script HTTP endpoint is configured for this Vercel deployment.</span>
       </section>
 
       <section id="page-dashboard" class="page active">
-        <div class="page-intro"><div><p class="eyebrow">AT A GLANCE</p><h2>Portfolio overview</h2><p class="muted">A live view of lending activity and receivables.</p></div><span class="environment-badge">DEVELOPMENT</span></div>
+        <div class="page-intro"><div><p class="eyebrow">AT A GLANCE</p><h2>Portfolio overview</h2><p class="muted">A live view of lending activity and receivables.</p></div><span class="environment-badge">READ ONLY</span></div>
         <div class="metric-grid" id="metrics"><article class="metric"><span>Customers</span><strong data-metric="totalCustomers">--</strong><small>Registered borrowers</small></article><article class="metric"><span>Loans</span><strong data-metric="totalLoans">--</strong><small>Total accounts</small></article><article class="metric accent"><span>Outstanding</span><strong data-metric="outstandingBalance">--</strong><small>Current receivables</small></article><article class="metric warm"><span>Overdue</span><strong data-metric="overdueBalance">--</strong><small>Requires attention</small></article></div>
         <div class="content-grid"><section class="panel"><div class="panel-heading"><div><p class="eyebrow">PORTFOLIO HEALTH</p><h3>Loan status</h3></div><span class="panel-note">Live records only</span></div><div class="status-list"><div><span>Active loans</span><strong data-metric="activeLoans">--</strong></div><div><span>Overdue loans</span><strong data-metric="overdueLoans">--</strong></div><div><span>Paid loans</span><strong data-metric="paidLoans">--</strong></div><div><span>Closed loans</span><strong data-metric="closedLoans">--</strong></div></div></section><section class="panel dark-panel"><p class="eyebrow">RECEIVABLES</p><h3>Cash and interest</h3><div class="finance-row"><span>Principal disbursed</span><strong data-metric="principalDisbursed">--</strong></div><div class="finance-row"><span>Interest charged</span><strong data-metric="interestCharged">--</strong></div><div class="finance-row"><span>Payments received</span><strong data-metric="paymentsReceived">--</strong></div><div class="finance-row"><span>Collections</span><strong data-metric="totalCollections">--</strong></div></section></div>
       </section>
-      <section id="page-placeholder" class="page"><div class="empty-panel"><span class="empty-icon">RL</span><p class="eyebrow">MODULE</p><h2 id="placeholder-title">Module</h2><p>This Vercel shell is connected to the same business contracts as the Apps Script application. Records will appear when the development API endpoint is configured.</p></div></section>
+      <section id="page-placeholder" class="page"><div class="empty-panel"><span class="empty-icon">RL</span><p class="eyebrow">MODULE</p><h2 id="placeholder-title">Module</h2><p>This Vercel shell is connected to the same business contracts as the Apps Script application. Detailed records will appear when this module is enabled.</p></div></section>
     </main>
   </div>
   <script src="/vercel/app.js" defer></script>
